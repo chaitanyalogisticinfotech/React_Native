@@ -4,17 +4,17 @@ import { Task } from '../types/task';
 
 type Props = {
   task: Task;
-  index: number;
   onPress: (taskId: number) => void;
   onLongPress: (taskId: number) => void;
 };
 
-export function TaskCard({ task, index, onPress, onLongPress }: Props) {
+export function TaskCard({ task, onPress, onLongPress }: Props) {
+
   return (
     <Pressable
       onPress={() => onPress(task.id)}
-      onLongPress={() => onLongPress(index)}
-      style={[styles.card, task.done && styles.cardDone, index % 2 && styles.oddCard]}>
+      onLongPress={() => onLongPress(task.id)}
+      style={[ styles.card, task.done && styles.cardDone, task.id % 2 !== 0 && styles.oddCard]}>
       <Text style={[styles.cardTitle, task.done && styles.doneText]}>{task.title}</Text>
       <Text style={styles.cardMeta}>Priority: {task.priority}</Text>
     </Pressable>

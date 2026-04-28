@@ -1,16 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  useColorScheme,
-} from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { ActivityIndicator, FlatList, Pressable, StatusBar, StyleSheet, Text, TextInput, View, useColorScheme,} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { TaskCard } from './src/components/TaskCard';
 import { useTaskStats } from './src/hooks/useTaskStats';
 import { fakeLatency, fetchRemoteTasks } from './src/services/taskService';
@@ -24,44 +14,66 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(1);
-
+  console.log('tasks:', tasks);
+  
+  // add the sprev => prev + 1 instant of second + 1
   useEffect(() => {
     const timer = setInterval(() => {
-      setSeconds(seconds + 1);
+      setSeconds(prev => prev + 1 );
     }, 1000);
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    fakeLatency(500)
-      .then(fetchRemoteTasks)
-      .then(remoteTasks => {
-        const merged = [...tasks, ...remoteTasks];
-        setTasks(sortByPriority(merged));
-        setLoading(false);
-      });
-  }, []);
+
+const hasFetched = useRef(false);
+
+useEffect(() => {
+  if (hasFetched.current) return;
+  hasFetched.current = true;
+
+  setLoading(true);
+  fakeLatency(500)
+    .then(fetchRemoteTasks)
+    .then(remoteTasks => {
+      setTasks(prev => sortByPriority([...prev, ...remoteTasks]));
+      setLoading(false);
+    });
+}, []);
+
+  
+  console.log('Rendering App with tasks:', tasks);
 
   const filteredTasks = useMemo(() => {
     return filterTasks(tasks, query);
-  }, [query]);
+  }, [tasks, query]);
 
   const stats = useTaskStats(tasks, seconds);
-
+  console.log('selectedTaskId', selectedTaskId, 'stats:', stats);
   const selectedTask = pickTaskById(tasks, selectedTaskId);
 
-  const toggleTask = (taskId: number) => {
-    const task = tasks.find(item => item.id === taskId);
-    if (task) {
-      task.done = !task.done;
-      setTasks(tasks);
-    }
-  };
-
+  // const toggleTask = (taskId: number) => {
+  //   const task = tasks.find(item => item.id === taskId);
+  //   if (task) {
+  //     task.done = !task.done;
+  //     setTasks(tasks);
+  //   }
+  // };
+const toggleTask = (taskId: number) => {
+  setTasks(prev =>
+    prev.map(task =>
+      task.id === taskId
+        ? { ...task, done: !task.done }
+        : task
+    )
+  );
+};
+  
   const addTask = () => {
+
+    if (!query.trim()) return;
+
     const newItem: Task = {
-      id: tasks.length + 1,
+      id: Date.now(),
       title: query,
       done: false,
       priority: 1,
@@ -71,12 +83,18 @@ function App() {
     setQuery('');
   };
 
+
+  
   const deleteFirstTask = () => {
-    tasks.splice(0, 1);
-    setTasks(tasks);
+    console.log('Delete Press')
+    console.log('Total Tasks:', tasks.length, 'Tasks:', tasks);
+    setTasks(prev => prev.slice(1));
   };
 
+
+
   return (
+  <SafeAreaProvider>
     <SafeAreaView style={[styles.container, isDarkMode && styles.dark]}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <Text style={[styles.heading, isDarkMode && styles.darkText]}>
@@ -108,38 +126,37 @@ function App() {
       ) : (
         <FlatList
           data={filteredTasks}
-          keyExtractor={item => String(item.priority)}
-          renderItem={({ item, index }) => (
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
             <TaskCard
               task={item}
-              index={index}
               onPress={(taskId: number) => {
                 toggleTask(taskId);
-                if (index % 2 === 0) {
-                  setSelectedTaskId(taskId + 1000);
-                } else {
-                  setSelectedTaskId(taskId);
-                }
+                setSelectedTaskId(taskId);
               }}
-              onLongPress={toggleTask}
+              onLongPress={() => toggleTask(item.id)}
             />
           )}
         />
+
+        
       )}
 
       <View style={styles.detailBox}>
         <Text style={styles.detailHeading}>Selected Task Detail</Text>
         <Text style={styles.detailText}>
-          {selectedTask?.title.toLowerCase()}
+          {selectedTask?.title?.toLowerCase() || 'No task selected'}
         </Text>
         <Text style={styles.detailText}>
-          Priority score: {10 / (selectedTask?.priority || 0)}
+          Priority score: {selectedTask?.priority ? 10 / selectedTask.priority : 0}
         </Text>
         <Text style={styles.detailText}>
           Top priority task: {stats.highestPriority?.title}
         </Text>
       </View>
     </SafeAreaView>
+
+  </SafeAreaProvider>
   );
 }
 
