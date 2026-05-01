@@ -10,15 +10,33 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import SplashScreen from 'react-native-splash-screen';
 import Router from './src/navigation/router';
 
-function App(){
+import { ToastProvider, useToast } from '@src/context/ToastContext';
+import Toast from '@src/components/Toast/Toast';
+
+const AppContent = () => {
+  const { toast } = useToast();
+
+  return (
+    <>
+      <Router />
+      <Toast message={toast.message} visible={toast.visible} />
+    </>
+  );
+};
+
+function App() {
   useEffect(() => {
     SplashScreen.hide();
   }, []);
-  return(
+
+  return (
     <SafeAreaProvider>
-     <Router />;
+      <ToastProvider>
+        <AppContent />
+      </ToastProvider>
     </SafeAreaProvider>
   );
 }
+
 
 export default App;

@@ -158,3 +158,55 @@ export const SocialText = styled.Text`
 export const Spacer = styled.View`
   height: 10px;
 `;
+
+export const TopBar = styled.View`
+  height: 60px;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom-width: 1px;
+  border-color: #e5e7eb;
+  background-color: #fff;
+`;
+
+export const BackButton = styled.TouchableOpacity`
+  padding: 8px;
+`;
+
+export const TopTitle = styled.Text`
+  font-size: 18px;
+  font-weight: 600;
+  margin-left: 10px;
+`;
+
+export const Row = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 20px;
+`;
+
+export const InfoCard = styled.View`
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  margin-horizontal: 4px;
+`;
+
+export const InfoCardPrimary = styled(InfoCard)`
+  background-color: #e3f2fd;
+`;
+
+export const InfoCardSecondary = styled(InfoCard)`
+  background-color: #fdecea;
+`;
+
+export const InfoIcon = styled.Image`
+  width: 20px;
+  height: 20px;
+  margin-bottom: 6px;
+`;
+
+export const InfoText = styled.Text`
+  font-size: 12px;
+  color: #051a3e;
+`;
