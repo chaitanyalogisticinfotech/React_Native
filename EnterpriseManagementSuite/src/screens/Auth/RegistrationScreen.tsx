@@ -23,9 +23,39 @@ import {
   SocialText,
 } from './Styled';
 
+import { registerUser } from '@src/services/Auth/firebaseAuth';
+
 const RegistrationScreen = ({navigation}) => {
   const [pass, setPass] = useState(false);
   const [confirm, setConfirm] = useState(false);
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+
+
+  const handleRegister = async () => {
+    setError('');
+
+    if (!name || !email || !password || !confirmPassword) {
+      return setError('All fields are required');
+    }
+
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match');
+    }
+
+    const res = await registerUser(name, email, password);
+
+    if (!res.success) {
+      setError(res.error);
+    } else {
+      console.log('User created:', res.user);
+      // navigation.navigate('Home'); // we will handle later
+    }
+  };
 
   return (
     <Container>
@@ -43,7 +73,7 @@ const RegistrationScreen = ({navigation}) => {
           <LeftIcon>
             {/* <Icon name="person" size={20} /> */}
           </LeftIcon>
-          <Input placeholder="Enter name" />
+          <Input placeholder="Enter name" value={name} onChangeText={setName} />
         </InputWrapper>
 
         <Label>Email</Label>
@@ -51,7 +81,7 @@ const RegistrationScreen = ({navigation}) => {
           <LeftIcon>
             {/* <Icon name="email" size={20} /> */}
           </LeftIcon>
-          <Input placeholder="email@example.com" />
+          <Input placeholder="email@example.com" value={email} onChangeText={setEmail} />
         </InputWrapper>
 
         <Label>Password</Label>
@@ -59,7 +89,7 @@ const RegistrationScreen = ({navigation}) => {
           <LeftIcon>
             {/* <Icon name="lock" size={20} /> */}
           </LeftIcon>
-          <Input secureTextEntry={!pass} />
+          <Input secureTextEntry={!pass} value={password} onChangeText={setPassword} />
           <RightIcon onPress={() => setPass(!pass)}>
             {/* <Icon name={pass ? 'visibility-off' : 'visibility'} size={20} /> */}
           </RightIcon>
@@ -70,15 +100,15 @@ const RegistrationScreen = ({navigation}) => {
           <LeftIcon>
             {/* <Icon name="lock" size={20} /> */}
           </LeftIcon>
-          <Input secureTextEntry={!confirm} />
+          <Input secureTextEntry={!confirm} value={confirmPassword} onChangeText={setConfirmPassword} />
           <RightIcon onPress={() => setConfirm(!confirm)}>
             {/* <Icon name={confirm ? 'visibility-off' : 'visibility'} size={20} /> */}
           </RightIcon>
         </InputWrapper>
 
-        <ErrorText>Passwords do not match</ErrorText>
-
-        <Button>
+        {/* <ErrorText>Passwords do not match</ErrorText> */}
+        {error ? <ErrorText>{error}</ErrorText> : null}
+        <Button onPress={handleRegister}>
           <ButtonText>Sign Up</ButtonText>
         </Button>
 
