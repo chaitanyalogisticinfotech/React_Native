@@ -36,7 +36,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
 
     const handleResetPassword = async () => {
     if (!email) {
-        return showToast('Please enter your email');
+      return showToast('Please enter your email');
     }
 
     setLoading(true);

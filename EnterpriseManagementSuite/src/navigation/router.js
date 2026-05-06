@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { getAuth, onAuthStateChanged } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 
 import AuthStack from './AuthStack';
 import AppStack from './AppStack';
@@ -10,10 +10,9 @@ const Router = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = getAuth();
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      console.log('Auth User:', user); // debug
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth User:', user); // 👈 DEBUG THIS
       setUser(user);
       setLoading(false);
     });

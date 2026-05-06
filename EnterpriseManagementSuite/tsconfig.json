@@ -7,6 +7,6 @@
       "@src/*": ["src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", "src/screens/Auth/Styled.js", "src/services/Auth/Auth.js", "src/config/firebaseConfig.js"],
+  "include": ["**/*.ts", "**/*.tsx", "src/screens/Auth/Styled.js", "src/services/Auth/Auth.js", "src/config/firebaseConfig.js", "src/navigation/Styled.js"],
   "exclude": ["**/node_modules", "**/Pods"]
 }

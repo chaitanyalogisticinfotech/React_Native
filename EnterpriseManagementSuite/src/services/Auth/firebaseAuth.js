@@ -1,23 +1,15 @@
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail
-} from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 
 // 🔥 REGISTER
 export const registerUser = async (name, email, password) => {
   try {
-    const auth = getAuth();
-
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
+    const userCredential = await auth().createUserWithEmailAndPassword(
       email,
       password
     );
 
-    await updateProfile(userCredential.user, {
+    // update name
+    await userCredential.user.updateProfile({
       displayName: name,
     });
 
@@ -30,10 +22,7 @@ export const registerUser = async (name, email, password) => {
 // 🔐 LOGIN
 export const loginUser = async (email, password) => {
   try {
-    const auth = getAuth();
-
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
+    const userCredential = await auth().signInWithEmailAndPassword(
       email,
       password
     );
@@ -44,14 +33,37 @@ export const loginUser = async (email, password) => {
   }
 };
 
+// 🔁 RESET PASSWORD
 export const resetPassword = async (email) => {
   try {
-    const auth = getAuth();
-
-    await sendPasswordResetEmail(auth, email);
+    await auth().sendPasswordResetEmail(email);
 
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };
+  }
+};
+
+// 👂 LISTEN USER (VERY IMPORTANT 🔥)
+export const listenToAuthChanges = (callback) => {
+  return auth().onAuthStateChanged(user => {
+    if (user) {
+      callback({
+        name: user.displayName || 'User',
+        email: user.email,
+        photo: user.photoURL || null,
+      });
+    } else {
+      callback(null);
+    }
+  });
+};
+
+// 🚪 LOGOUT
+export const logoutUser = async () => {
+  try {
+    await auth().signOut();
+  } catch (error) {
+    throw error;
   }
 };
